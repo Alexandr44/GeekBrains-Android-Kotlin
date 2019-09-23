@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(main_toolbar)
         initViewModel()
         initRv()
+        initFab()
     }
 
     private fun initViewModel() {
@@ -33,9 +34,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initRv() {
-        rv_notes.layoutManager = GridLayoutManager(this, 3)
-        adapter = NotesRvAdapter()
+        rv_notes.layoutManager = GridLayoutManager(this, 2)
+        adapter = NotesRvAdapter{
+            NoteActivity.start(this, it)
+        }
         rv_notes.adapter = adapter
+    }
+
+    private fun initFab() {
+        fab.setOnClickListener {
+            NoteActivity.start(this)
+        }
     }
 
 }

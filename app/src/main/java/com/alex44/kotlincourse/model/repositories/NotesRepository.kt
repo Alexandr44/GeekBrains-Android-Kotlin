@@ -1,69 +1,108 @@
 package com.alex44.kotlincourse.model.repositories
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.alex44.kotlincourse.model.dtos.NoteDTO
+import java.util.*
 
 object NotesRepository {
 
-    private val notes: List<NoteDTO> = listOf(
+    private val notesLiveData = MutableLiveData<List<NoteDTO>>()
+
+    private val notes = mutableListOf(
             NoteDTO(
+                    UUID.randomUUID().toString(),
                     "Первая заметка",
                     "Текст первой заметки. Какой-то очень важный или не очень текст, напоминание, или ещё что-то.",
-                    0xfff06292.toInt()
+                    NoteDTO.Color.YELLOW
             ),
             NoteDTO(
+                    UUID.randomUUID().toString(),
                     "Вторая заметка",
                     "Текст второй заметки. Какой-то очень важный или не очень текст, напоминание, или ещё что-то.",
-                    0xff9575cd.toInt()
+                    NoteDTO.Color.BLUE
             ),
             NoteDTO(
+                    UUID.randomUUID().toString(),
                     "Третья заметка",
                     "Текст третьей заметки. Какой-то очень важный или не очень текст, напоминание, или ещё что-то.",
-                    0xff64b5f6.toInt()
+                    NoteDTO.Color.GREEN
             ),
             NoteDTO(
+                    UUID.randomUUID().toString(),
                     "Четвертая заметка",
                     "Текст четвертой заметки. Какой-то очень важный или не очень текст, напоминание, или ещё что-то.",
-                    0xff4db6ac.toInt()
+                    NoteDTO.Color.RED
             ),
             NoteDTO(
+                    UUID.randomUUID().toString(),
                     "Пятая заметка",
                     "Текст пятой заметки. Какой-то очень важный или не очень текст, напоминание, или ещё что-то.",
-                    0xffb2ff59.toInt()
+                    NoteDTO.Color.VIOLET
             ),
             NoteDTO(
+                    UUID.randomUUID().toString(),
                     "Шестая заметка",
                     "Текст шестой заметки. Какой-то очень важный или не очень текст, напоминание, или ещё что-то.",
-                    0xffffeb3b.toInt()
+                    NoteDTO.Color.ORANGE
             ),
             NoteDTO(
+                    UUID.randomUUID().toString(),
                     "Седьмая заметка",
                     "Текст седьмой заметки. Какой-то очень важный или не очень текст, напоминание, или ещё что-то.",
-                    0xff4db6ac.toInt()
+                    NoteDTO.Color.PINK
             ),
             NoteDTO(
+                    UUID.randomUUID().toString(),
                     "Восьмая заметка",
                     "Текст восьмой заметки. Какой-то очень важный или не очень текст, напоминание, или ещё что-то.",
-                    0xfff06292.toInt()
+                    NoteDTO.Color.WHITE
             ),
             NoteDTO(
+                    UUID.randomUUID().toString(),
                     "Девятая заметка",
                     "Текст девятой заметки. Какой-то очень важный или не очень текст, напоминание, или ещё что-то.",
-                    0xff64b5f6.toInt()
+                    NoteDTO.Color.BLACK
             ),
             NoteDTO(
+                    UUID.randomUUID().toString(),
                     "Десятая заметка",
                     "Текст десятой заметки. Какой-то очень важный или не очень текст, напоминание, или ещё что-то.",
-                    0xff9575cd.toInt()
+                    NoteDTO.Color.ORANGE
             )
-
     )
 
-    //Это просто виртуальное поле ради интереса
-    val importantNotes
-        get() = notes
+    init {
+        notesLiveData.value = notes
+    }
 
-    fun getNotes(): List<NoteDTO> {
-        return notes
+    fun getNotes(): LiveData<List<NoteDTO>> {
+        return notesLiveData
+    }
+
+    fun saveNote(note : NoteDTO) {
+        addOrReplace(note)
+        notesLiveData.value = notes
+    }
+
+    private fun addOrReplace(note : NoteDTO) {
+        for (i in 0 until notes.size) {
+            if (notes[i] == note) {
+                notes[i] = note
+                return
+            }
+        }
+        notes.add(note)
+    }
+
+    fun deleteNote(note: NoteDTO) {
+        for (i in 0 until notes.size) {
+            if (notes[i] == note) {
+                notes.removeAt(i)
+                break
+            }
+        }
+        notesLiveData.value = notes
     }
 
 }
