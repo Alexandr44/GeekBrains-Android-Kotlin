@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.alex44.kotlincourse.model.repositories.NotesRepository
+import com.alex44.kotlincourse.viewmodel.states.MainViewState
 
 class MainViewModel : ViewModel() {
 
