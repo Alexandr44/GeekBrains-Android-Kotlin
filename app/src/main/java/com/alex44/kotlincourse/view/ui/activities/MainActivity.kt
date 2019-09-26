@@ -42,7 +42,8 @@ class MainActivity : BaseActivity<List<NoteDTO>?, MainViewState>() {
     }
 
     override fun renderData(data: List<NoteDTO>?) {
-        data?.let {list ->
+        val sortedData = data?.sortedWith(compareBy { it.dateUpdate })
+        sortedData?.let {list ->
             adapter.notes = list
         }
     }
