@@ -1,36 +1,30 @@
 package com.alex44.kotlincourse.view.ui.activities
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import com.alex44.kotlincourse.R
+import com.alex44.kotlincourse.model.dtos.NoteDTO
 import com.alex44.kotlincourse.view.ui.adapters.NotesRvAdapter
 import com.alex44.kotlincourse.viewmodel.MainViewModel
+import com.alex44.kotlincourse.viewmodel.states.MainViewState
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity<List<NoteDTO>?, MainViewState>() {
 
-    lateinit var viewModel : MainViewModel
+    override val viewModel: MainViewModel by lazy {
+        ViewModelProviders.of(this).get(MainViewModel::class.java)
+    }
+
+    override val layoutResource : Int = R.layout.activity_main
+
     lateinit var adapter: NotesRvAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
         setSupportActionBar(main_toolbar)
-        initViewModel()
         initRv()
         initFab()
-    }
-
-    private fun initViewModel() {
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        viewModel.viewState().observe(this, Observer {viewState ->
-            viewState?.let {//Тут можно тоже написать 'типа vs ->'? тогда нужно будет поменять it. Эти нубские комменты потом нужно будет удалить
-                adapter.notes = it.notes
-            }
-        })
     }
 
     private fun initRv() {
@@ -44,6 +38,12 @@ class MainActivity : AppCompatActivity() {
     private fun initFab() {
         fab.setOnClickListener {
             NoteActivity.start(this)
+        }
+    }
+
+    override fun renderData(data: List<NoteDTO>?) {
+        data?.let {list ->
+            adapter.notes = list
         }
     }
 

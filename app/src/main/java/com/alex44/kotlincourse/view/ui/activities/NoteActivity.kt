@@ -4,17 +4,17 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View.VISIBLE
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import com.alex44.kotlincourse.R
 import com.alex44.kotlincourse.model.dtos.NoteDTO
 import com.alex44.kotlincourse.viewmodel.NoteViewModel
+import com.alex44.kotlincourse.viewmodel.states.NoteViewState
 import kotlinx.android.synthetic.main.activity_note.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NoteActivity : AppCompatActivity() {
+class NoteActivity : BaseActivity<NoteDTO?, NoteViewState>() {
 
     companion object {
         private val EXTRA_NOTE = NoteActivity::class.java.name + "extra.NOTE"
@@ -22,27 +22,31 @@ class NoteActivity : AppCompatActivity() {
 
         fun start(context: Context, note: NoteDTO? = null) {
             val intent = Intent(context, NoteActivity::class.java).apply {
-                putExtra(EXTRA_NOTE, note)
+                note?.let {
+                    putExtra(EXTRA_NOTE, note.id)
+                }
             }
             context.startActivity(intent)
         }
     }
 
     private var note : NoteDTO? = null
-    lateinit var noteViewModel : NoteViewModel
+    override val layoutResource: Int = R.layout.activity_note
+    override val viewModel : NoteViewModel by lazy {
+        ViewModelProviders.of(this).get(NoteViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_note)
         setSupportActionBar(note_toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        note = intent.getParcelableExtra(EXTRA_NOTE)
-        noteViewModel = ViewModelProviders.of(this).get(NoteViewModel::class.java)
-
-        initBar()
-        initNote()
-        initButtons()
+        val noteId = intent.getStringExtra(EXTRA_NOTE)
+        noteId?.let {
+            viewModel.loadNote(it)
+        } ?: let {
+            getString(R.string.new_note_bar_title)
+        }
     }
 
     private fun initBar() {
@@ -82,9 +86,13 @@ class NoteActivity : AppCompatActivity() {
                     title = note_title.text.toString(),
                     text = note_text.text.toString(),
                     dateUpdate = Date()
-            ) ?: createNewNote()
-            if (note != null) {
-                noteViewModel.save(note!!)
+            ) ?: NoteDTO(
+                    UUID.randomUUID().toString(),
+                    note_title.text.toString(),
+                    note_text.text.toString()
+            )
+            note?.let {
+                viewModel.save(it)
             }
             onBackPressed()
         }
@@ -94,13 +102,18 @@ class NoteActivity : AppCompatActivity() {
         }
 
         button_delete.setOnClickListener {
-            if (note != null) {
-                noteViewModel.delete(note!!)
+            note?.let {
+                viewModel.delete(it)
             }
             onBackPressed()
         }
     }
 
-    private fun createNewNote() = NoteDTO(UUID.randomUUID().toString(), note_title.text.toString(), note_text.text.toString())
+    override fun renderData(data: NoteDTO?) {
+        this.note = data
+        initBar()
+        initNote()
+        initButtons()
+    }
 
 }
