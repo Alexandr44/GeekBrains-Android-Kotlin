@@ -3,7 +3,7 @@ package com.alex44.kotlincourse.model.providers
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.alex44.kotlincourse.model.NoteResult
-import com.alex44.kotlincourse.model.dtos.NoteDTO
+import com.alex44.kotlincourse.model.dtos.Note
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import timber.log.Timber
@@ -24,9 +24,9 @@ class FireStoreProvider : RemoteDataProvider {
                 result.value = NoteResult.Error(error)
             }
             else if (snapshot != null) {
-                val notes = mutableListOf<NoteDTO>()
+                val notes = mutableListOf<Note>()
                 for (doc: QueryDocumentSnapshot in snapshot) {
-                    notes.add(doc.toObject(NoteDTO::class.java))
+                    notes.add(doc.toObject(Note::class.java))
                 }
                 result.value = NoteResult.Success(notes)
             }
@@ -38,7 +38,7 @@ class FireStoreProvider : RemoteDataProvider {
         val result = MutableLiveData<NoteResult>()
         notesReference.document(id).get()
                 .addOnSuccessListener {
-                    result.value = NoteResult.Success(it.toObject(NoteDTO::class.java))
+                    result.value = NoteResult.Success(it.toObject(Note::class.java))
                 }
                 .addOnFailureListener {
                     result.value = NoteResult.Error(it)
@@ -46,7 +46,7 @@ class FireStoreProvider : RemoteDataProvider {
         return result
     }
 
-    override fun saveNote(note: NoteDTO): LiveData<NoteResult> {
+    override fun saveNote(note: Note): LiveData<NoteResult> {
         val result = MutableLiveData<NoteResult>()
         notesReference.document(note.id).set(note)
                 .addOnSuccessListener {
@@ -60,7 +60,7 @@ class FireStoreProvider : RemoteDataProvider {
         return result
     }
 
-    override fun deleteNote(note: NoteDTO): LiveData<NoteResult> {
+    override fun deleteNote(note: Note): LiveData<NoteResult> {
         val result = MutableLiveData<NoteResult>()
         notesReference.document(note.id).delete()
                 .addOnSuccessListener {

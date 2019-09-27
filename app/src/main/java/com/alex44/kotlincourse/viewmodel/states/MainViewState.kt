@@ -1,5 +1,5 @@
 package com.alex44.kotlincourse.viewmodel.states
 
-import com.alex44.kotlincourse.model.dtos.NoteDTO
+import com.alex44.kotlincourse.model.dtos.Note
 
-class MainViewState (val notes : List<NoteDTO>? = null, error : Throwable? = null) : BaseViewState<List<NoteDTO>?>(notes, error)
+class MainViewState (val notes : List<Note>? = null, error : Throwable? = null) : BaseViewState<List<Note>?>(notes, error)

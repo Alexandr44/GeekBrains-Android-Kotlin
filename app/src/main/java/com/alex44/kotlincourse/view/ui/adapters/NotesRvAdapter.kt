@@ -6,12 +6,12 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.alex44.kotlincourse.R
-import com.alex44.kotlincourse.model.dtos.NoteDTO
+import com.alex44.kotlincourse.model.dtos.Note
 import kotlinx.android.synthetic.main.note_item.view.*
 
-class NotesRvAdapter(val onItemClick: ((NoteDTO) -> Unit)? = null) : RecyclerView.Adapter<NotesRvAdapter.ViewHolder>() {
+class NotesRvAdapter(val onItemClick: ((Note) -> Unit)? = null) : RecyclerView.Adapter<NotesRvAdapter.ViewHolder>() {
 
-    var notes: List<NoteDTO> = listOf()
+    var notes: List<Note> = listOf()
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -29,20 +29,20 @@ class NotesRvAdapter(val onItemClick: ((NoteDTO) -> Unit)? = null) : RecyclerVie
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        fun bind(note: NoteDTO) = with(itemView) {
+        fun bind(note: Note) = with(itemView) {
             item_title.text = note.title
             item_text.text = note.text
 
             val color = when(note.color) {
-                NoteDTO.Color.RED -> R.color.noteColorRed
-                NoteDTO.Color.ORANGE -> R.color.noteColorOrange
-                NoteDTO.Color.YELLOW -> R.color.noteColorYellow
-                NoteDTO.Color.GREEN -> R.color.noteColorGreen
-                NoteDTO.Color.BLUE -> R.color.noteColorBlue
-                NoteDTO.Color.VIOLET -> R.color.noteColorViolet
-                NoteDTO.Color.PINK -> R.color.noteColorPink
-                NoteDTO.Color.WHITE -> R.color.noteColorWhite
-                NoteDTO.Color.BLACK -> R.color.noteColorBlack
+                Note.Color.RED -> R.color.noteColorRed
+                Note.Color.ORANGE -> R.color.noteColorOrange
+                Note.Color.YELLOW -> R.color.noteColorYellow
+                Note.Color.GREEN -> R.color.noteColorGreen
+                Note.Color.BLUE -> R.color.noteColorBlue
+                Note.Color.VIOLET -> R.color.noteColorViolet
+                Note.Color.PINK -> R.color.noteColorPink
+                Note.Color.WHITE -> R.color.noteColorWhite
+                Note.Color.BLACK -> R.color.noteColorBlack
             }
 
             itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, color))

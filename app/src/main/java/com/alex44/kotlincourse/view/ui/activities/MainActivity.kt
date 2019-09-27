@@ -4,13 +4,13 @@ import android.os.Bundle
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import com.alex44.kotlincourse.R
-import com.alex44.kotlincourse.model.dtos.NoteDTO
+import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.view.ui.adapters.NotesRvAdapter
 import com.alex44.kotlincourse.viewmodel.MainViewModel
 import com.alex44.kotlincourse.viewmodel.states.MainViewState
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : BaseActivity<List<NoteDTO>?, MainViewState>() {
+class MainActivity : BaseActivity<List<Note>?, MainViewState>() {
 
     override val viewModel: MainViewModel by lazy {
         ViewModelProviders.of(this).get(MainViewModel::class.java)
@@ -41,7 +41,7 @@ class MainActivity : BaseActivity<List<NoteDTO>?, MainViewState>() {
         }
     }
 
-    override fun renderData(data: List<NoteDTO>?) {
+    override fun renderData(data: List<Note>?) {
         val sortedData = data?.sortedWith(compareBy { it.dateUpdate })
         sortedData?.let {list ->
             adapter.notes = list

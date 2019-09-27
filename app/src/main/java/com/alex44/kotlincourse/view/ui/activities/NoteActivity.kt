@@ -7,20 +7,20 @@ import android.view.View.VISIBLE
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import com.alex44.kotlincourse.R
-import com.alex44.kotlincourse.model.dtos.NoteDTO
+import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.viewmodel.NoteViewModel
 import com.alex44.kotlincourse.viewmodel.states.NoteViewState
 import kotlinx.android.synthetic.main.activity_note.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NoteActivity : BaseActivity<NoteDTO?, NoteViewState>() {
+class NoteActivity : BaseActivity<Note?, NoteViewState>() {
 
     companion object {
         private val EXTRA_NOTE = NoteActivity::class.java.name + "extra.NOTE"
         private const val DATE_TIME_FORMAT = "dd.MM.yy HH:mm"
 
-        fun start(context: Context, note: NoteDTO? = null) {
+        fun start(context: Context, note: Note? = null) {
             val intent = Intent(context, NoteActivity::class.java).apply {
                 note?.let {
                     putExtra(EXTRA_NOTE, note.id)
@@ -30,7 +30,7 @@ class NoteActivity : BaseActivity<NoteDTO?, NoteViewState>() {
         }
     }
 
-    private var note : NoteDTO? = null
+    private var note : Note? = null
     override val layoutResource: Int = R.layout.activity_note
     override val viewModel : NoteViewModel by lazy {
         ViewModelProviders.of(this).get(NoteViewModel::class.java)
@@ -63,15 +63,15 @@ class NoteActivity : BaseActivity<NoteDTO?, NoteViewState>() {
             note_title.setText(note!!.title)
             note_text.setText(note!!.text)
             val color = when (note!!.color) {
-                NoteDTO.Color.RED -> R.color.noteColorRed
-                NoteDTO.Color.ORANGE -> R.color.noteColorOrange
-                NoteDTO.Color.YELLOW -> R.color.noteColorYellow
-                NoteDTO.Color.GREEN -> R.color.noteColorGreen
-                NoteDTO.Color.BLUE -> R.color.noteColorBlue
-                NoteDTO.Color.VIOLET -> R.color.noteColorViolet
-                NoteDTO.Color.PINK -> R.color.noteColorPink
-                NoteDTO.Color.WHITE -> R.color.noteColorWhite
-                NoteDTO.Color.BLACK -> R.color.noteColorBlack
+                Note.Color.RED -> R.color.noteColorRed
+                Note.Color.ORANGE -> R.color.noteColorOrange
+                Note.Color.YELLOW -> R.color.noteColorYellow
+                Note.Color.GREEN -> R.color.noteColorGreen
+                Note.Color.BLUE -> R.color.noteColorBlue
+                Note.Color.VIOLET -> R.color.noteColorViolet
+                Note.Color.PINK -> R.color.noteColorPink
+                Note.Color.WHITE -> R.color.noteColorWhite
+                Note.Color.BLACK -> R.color.noteColorBlack
             }
 
             note_toolbar.setBackgroundColor(ContextCompat.getColor(this, color))
@@ -86,7 +86,7 @@ class NoteActivity : BaseActivity<NoteDTO?, NoteViewState>() {
                     title = note_title.text.toString(),
                     text = note_text.text.toString(),
                     dateUpdate = Date()
-            ) ?: NoteDTO(
+            ) ?: Note(
                     UUID.randomUUID().toString(),
                     note_title.text.toString(),
                     note_text.text.toString()
@@ -109,7 +109,7 @@ class NoteActivity : BaseActivity<NoteDTO?, NoteViewState>() {
         }
     }
 
-    override fun renderData(data: NoteDTO?) {
+    override fun renderData(data: Note?) {
         this.note = data
         initBar()
         initNote()

@@ -1,6 +1,6 @@
 package com.alex44.kotlincourse.model.repositories
 
-import com.alex44.kotlincourse.model.dtos.NoteDTO
+import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.model.providers.FireStoreProvider
 import com.alex44.kotlincourse.model.providers.RemoteDataProvider
 
@@ -12,8 +12,8 @@ object NotesRepository {
 
     fun getNoteById(id : String) = dataProvider.getNoteById(id)
 
-    fun saveNote(note : NoteDTO) = dataProvider.saveNote(note)
+    fun saveNote(note : Note) = dataProvider.saveNote(note)
 
-    fun deleteNote(note : NoteDTO) = dataProvider.deleteNote(note)
+    fun deleteNote(note : Note) = dataProvider.deleteNote(note)
 
 }

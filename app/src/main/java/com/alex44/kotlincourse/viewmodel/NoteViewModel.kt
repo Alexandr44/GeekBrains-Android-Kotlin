@@ -2,17 +2,17 @@ package com.alex44.kotlincourse.viewmodel
 
 import androidx.lifecycle.Observer
 import com.alex44.kotlincourse.model.NoteResult
-import com.alex44.kotlincourse.model.dtos.NoteDTO
+import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.model.repositories.NotesRepository
 import com.alex44.kotlincourse.viewmodel.states.NoteViewState
 
-class NoteViewModel : BaseViewModel<NoteDTO?, NoteViewState>() {
+class NoteViewModel : BaseViewModel<Note?, NoteViewState>() {
 
     init {
         viewStateLiveData.value = NoteViewState()
     }
 
-    fun save(note : NoteDTO) {
+    fun save(note : Note) {
         NotesRepository.saveNote(note)
     }
 
@@ -21,13 +21,13 @@ class NoteViewModel : BaseViewModel<NoteDTO?, NoteViewState>() {
             if (result == null) return@Observer
 
             when(result) {
-                is NoteResult.Success<*> -> viewStateLiveData.value = NoteViewState(note = result.data as? NoteDTO)
+                is NoteResult.Success<*> -> viewStateLiveData.value = NoteViewState(note = result.data as? Note)
                 is NoteResult.Error -> viewStateLiveData.value = NoteViewState(error = result.error)
             }
         })
     }
 
-    fun delete(note: NoteDTO) {
+    fun delete(note: Note) {
         NotesRepository.deleteNote(note)
     }
 

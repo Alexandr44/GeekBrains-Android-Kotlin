@@ -1,14 +1,13 @@
 package com.alex44.kotlincourse.viewmodel
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.alex44.kotlincourse.model.NoteResult
-import com.alex44.kotlincourse.model.dtos.NoteDTO
+import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.model.repositories.NotesRepository
 import com.alex44.kotlincourse.viewmodel.states.MainViewState
 
-class MainViewModel : BaseViewModel<List<NoteDTO>?, MainViewState>() {
+class MainViewModel : BaseViewModel<List<Note>?, MainViewState>() {
 
     private val repositoryNotes = NotesRepository.getNotes()
 
@@ -17,7 +16,7 @@ class MainViewModel : BaseViewModel<List<NoteDTO>?, MainViewState>() {
 
         when (noteResult) {
             is NoteResult.Success<*> -> {
-                viewStateLiveData.value = MainViewState(notes = noteResult.data as? List<NoteDTO>)
+                viewStateLiveData.value = MainViewState(notes = noteResult.data as? List<Note>)
             }
             is NoteResult.Error -> {
                 viewStateLiveData.value = MainViewState(error = noteResult.error)

@@ -5,7 +5,7 @@ import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 @Parcelize
-data class NoteDTO (
+data class Note (
     val id: String = "",
     val title: String = "",
     val text: String = "",
@@ -17,7 +17,7 @@ data class NoteDTO (
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as NoteDTO
+        other as Note
 
         if (id != other.id) return false
         return true
