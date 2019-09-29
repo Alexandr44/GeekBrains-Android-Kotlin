@@ -10,7 +10,7 @@ import com.alex44.kotlincourse.viewmodel.states.SplashViewState
 class SplashActivity : BaseActivity<Boolean?, SplashViewState>() {
 
     companion object {
-        private const val START_DELAY = 1500L
+        private const val START_DELAY = 1000L
     }
 
     override val viewModel: SplashViewModel by lazy {

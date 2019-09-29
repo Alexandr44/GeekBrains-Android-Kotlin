@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_bar_title">Мои заметки</string>
+    <string name="app_name">Курс Котлин</string>
+    <string name="cancel_text">ОТМЕНА</string>
+    <string name="delete_text">УДАЛИТЬ</string>
+    <string name="logout">Выход</string>
+    <string name="new_note_bar_title">Новая заметка</string>
+    <string name="note_default_text">Текст заметки</string>
+    <string name="note_default_title">Заголовок</string>
+    <string name="ok_text">ОК</string>
+</resources>
