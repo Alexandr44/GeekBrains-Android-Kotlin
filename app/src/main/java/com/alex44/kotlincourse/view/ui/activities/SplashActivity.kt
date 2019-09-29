@@ -1,7 +1,9 @@
 package com.alex44.kotlincourse.view.ui.activities
 
+import android.os.Bundle
 import android.os.Handler
 import androidx.lifecycle.ViewModelProviders
+import com.alex44.kotlincourse.R
 import com.alex44.kotlincourse.viewmodel.SplashViewModel
 import com.alex44.kotlincourse.viewmodel.states.SplashViewState
 
@@ -16,6 +18,11 @@ class SplashActivity : BaseActivity<Boolean?, SplashViewState>() {
     }
 
     override val layoutResource: Int? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setTheme(R.style.SplashTheme)
+    }
 
     override fun onResume() {
         super.onResume()
