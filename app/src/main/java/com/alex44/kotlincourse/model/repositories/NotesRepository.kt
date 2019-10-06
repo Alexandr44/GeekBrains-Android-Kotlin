@@ -16,4 +16,5 @@ object NotesRepository {
 
     fun deleteNote(note : Note) = dataProvider.deleteNote(note)
 
+    fun getCurrentUser() = dataProvider.getCurrentUser()
 }

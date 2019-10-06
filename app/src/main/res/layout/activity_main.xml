@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll|enterAlways"
-            app:title="My Notes App"
+            app:title="@string/app_bar_title"
             />
 
     </com.google.android.material.appbar.AppBarLayout>

@@ -4,74 +4,102 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.alex44.kotlincourse.model.NoteResult
 import com.alex44.kotlincourse.model.dtos.Note
+import com.alex44.kotlincourse.model.dtos.User
+import com.alex44.kotlincourse.model.errors.NoAuthException
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QueryDocumentSnapshot
 import timber.log.Timber
 
 class FireStoreProvider : RemoteDataProvider {
 
     companion object {
         private const val NOTES_COLLECTION = "notes_collection"
+        private const val USERS_COLLECTION = "users_collection"
     }
 
-    private val store = FirebaseFirestore.getInstance()
-    private val notesReference = store.collection(NOTES_COLLECTION)
+    private val store by lazy { FirebaseFirestore.getInstance() }
+    private val fireStoreUser
+        get() = FirebaseAuth.getInstance().currentUser
 
-    override fun subscribeToAllNotes(): LiveData<NoteResult> {
-        val result = MutableLiveData<NoteResult>()
-        notesReference.addSnapshotListener {snapshot, error ->
-            if (error != null) {
-                result.value = NoteResult.Error(error)
-            }
-            else if (snapshot != null) {
-                val notes = mutableListOf<Note>()
-                for (doc: QueryDocumentSnapshot in snapshot) {
-                    notes.add(doc.toObject(Note::class.java))
-                }
-                result.value = NoteResult.Success(notes)
-            }
+
+    override fun subscribeToAllNotes(): LiveData<NoteResult> = MutableLiveData<NoteResult>().apply {
+        try {
+            getUserNotesCollection()
+                    .addSnapshotListener { snapshot, error ->
+                        value = error?.let { exc ->
+                            NoteResult.Error(exc)
+                        } ?: let {
+                            snapshot?.let {
+                                val notes = it.documents.map { doc ->
+                                    doc.toObject(Note::class.java)
+                                }
+                                NoteResult.Success(notes)
+                            }
+                        }
+                    }
         }
-        return result
+        catch (e : Throwable) {
+            NoteResult.Error(e)
+        }
     }
 
-    override fun getNoteById(id: String): LiveData<NoteResult> {
-        val result = MutableLiveData<NoteResult>()
-        notesReference.document(id).get()
-                .addOnSuccessListener {
-                    result.value = NoteResult.Success(it.toObject(Note::class.java))
-                }
-                .addOnFailureListener {
-                    result.value = NoteResult.Error(it)
-                }
-        return result
+    override fun getNoteById(id: String): LiveData<NoteResult> = MutableLiveData<NoteResult>().apply {
+        try {
+            getUserNotesCollection().document(id).get()
+                    .addOnSuccessListener {
+                        value = NoteResult.Success(it.toObject(Note::class.java))
+                    }
+                    .addOnFailureListener {
+                        value = NoteResult.Error(it)
+                    }
+        }
+        catch (e : Throwable) {
+            NoteResult.Error(e)
+        }
     }
 
-    override fun saveNote(note: Note): LiveData<NoteResult> {
-        val result = MutableLiveData<NoteResult>()
-        notesReference.document(note.id).set(note)
-                .addOnSuccessListener {
-                    Timber.d("Note $note is saved to firestore")
-                    result.value = NoteResult.Success(note)
-                }
-                .addOnFailureListener {
-                    Timber.e("Error while saving note $note with message: ${it.message}")
-                    result.value = NoteResult.Error(it)
-                }
-        return result
+    override fun saveNote(note: Note): LiveData<NoteResult> = MutableLiveData<NoteResult>().apply {
+        try {
+            getUserNotesCollection().document(note.id).set(note)
+                    .addOnSuccessListener {
+                        Timber.d("Note $note is saved to firestore")
+                        value = NoteResult.Success(note)
+                    }
+                    .addOnFailureListener {
+                        Timber.e("Error while saving note $note with message: ${it.message}")
+                        value = NoteResult.Error(it)
+                    }
+        }
+        catch (e : Throwable) {
+            NoteResult.Error(e)
+        }
     }
 
-    override fun deleteNote(note: Note): LiveData<NoteResult> {
-        val result = MutableLiveData<NoteResult>()
-        notesReference.document(note.id).delete()
-                .addOnSuccessListener {
-                    Timber.d("Note $note is deleted from firestore")
-                    result.value = NoteResult.Success(note)
-                }
-                .addOnFailureListener {
-                    Timber.e("Error while deleting note $note with message: ${it.message}")
-                    result.value = NoteResult.Error(it)
-                }
-        return result
+    override fun deleteNote(note: Note): LiveData<NoteResult> = MutableLiveData<NoteResult>().apply {
+        try {
+            getUserNotesCollection().document(note.id).delete()
+                    .addOnSuccessListener {
+                        Timber.d("Note $note is deleted from firestore")
+                        value = NoteResult.Success(note)
+                    }
+                    .addOnFailureListener {
+                        Timber.e("Error while deleting note $note with message: ${it.message}")
+                        value = NoteResult.Error(it)
+                    }
+        }
+        catch (e : Throwable) {
+            NoteResult.Error(e)
+        }
     }
+
+    override fun getCurrentUser(): LiveData<User?> = MutableLiveData<User?>().apply {
+        value = fireStoreUser?.let {
+            User(it.displayName ?: "", it.email ?: "", it.phoneNumber ?: "", it.photoUrl?.toString() ?: "")
+        }
+    }
+
+    private fun getUserNotesCollection() = fireStoreUser?.let {
+        store.collection(USERS_COLLECTION).document(it.uid).collection(NOTES_COLLECTION)
+    } ?: throw NoAuthException()
 
 }
