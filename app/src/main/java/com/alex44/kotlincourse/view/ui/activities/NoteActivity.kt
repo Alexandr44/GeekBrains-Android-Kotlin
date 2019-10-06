@@ -1,24 +1,30 @@
 package com.alex44.kotlincourse.view.ui.activities
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View.VISIBLE
+import android.view.Menu
+import android.view.MenuItem
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import com.alex44.kotlincourse.R
 import com.alex44.kotlincourse.model.dtos.Note
+import com.alex44.kotlincourse.model.extensions.getColorInt
 import com.alex44.kotlincourse.viewmodel.NoteViewModel
 import com.alex44.kotlincourse.viewmodel.states.NoteViewState
 import kotlinx.android.synthetic.main.activity_note.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.contracts.ExperimentalContracts
 
 class NoteActivity : BaseActivity<Note?, NoteViewState>() {
 
     companion object {
         private val EXTRA_NOTE = NoteActivity::class.java.name + "extra.NOTE"
         private const val DATE_TIME_FORMAT = "dd.MM.yy HH:mm"
+        private const val DURATION : Long = 300
 
         fun start(context: Context, note: Note? = null) {
             val intent = Intent(context, NoteActivity::class.java).apply {
@@ -30,6 +36,7 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
         }
     }
 
+    private var color: Note.Color = Note.Color.WHITE
     private var note : Note? = null
     override val layoutResource: Int = R.layout.activity_note
     override val viewModel : NoteViewModel by lazy {
@@ -53,9 +60,6 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
         supportActionBar?.title = note?.let {
             SimpleDateFormat(DATE_TIME_FORMAT, Locale.getDefault()).format(note!!.dateUpdate)
         } ?: getString(R.string.new_note_bar_title)
-        if (note != null) {
-            button_delete.visibility = VISIBLE
-        }
     }
 
     private fun initNote() {
@@ -81,39 +85,95 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
 
     private fun initButtons() {
         button_ok.setOnClickListener {
-           if (note_title.text == null || note_title.text?.length ?: 0 <= 0) return@setOnClickListener
-            note = note?.copy(
-                    title = note_title.text.toString(),
-                    text = note_text.text.toString(),
-                    dateUpdate = Date()
-            ) ?: Note(
-                    UUID.randomUUID().toString(),
-                    note_title.text.toString(),
-                    note_text.text.toString()
-            )
-            note?.let {
-                viewModel.save(it)
-            }
-            onBackPressed()
+           saveNote()
         }
 
         button_cancel.setOnClickListener {
             onBackPressed()
         }
+    }
 
-        button_delete.setOnClickListener {
-            note?.let {
-                viewModel.delete(it)
-            }
-            onBackPressed()
+    private fun initColorPicker() {
+        colorPicker.onColorClickListener = { color ->
+            this.color = color
+            note_toolbar.setBackgroundColor(color.getColorInt(this))
+            hor_scroll_view.setBackgroundColor(color.getColorInt(this))
         }
     }
 
+    @ExperimentalContracts
     override fun renderData(data: Note?) {
         this.note = data
+        this.color = note?.color ?: Note.Color.WHITE
         initBar()
         initNote()
         initButtons()
+        initColorPicker()
+    }
+
+    private fun saveNote() {
+        if (note_title.text == null || note_title.text?.length ?: 0 <= 0) return
+        note = note?.copy(
+                title = note_title.text.toString(),
+                text = note_text.text.toString(),
+                dateUpdate = Date(),
+                color = this.color
+        ) ?: Note(
+                UUID.randomUUID().toString(),
+                note_title.text.toString(),
+                note_text.text.toString(),
+                this.color
+        )
+        note?.let {
+            viewModel.save(it)
+        }
+        onBackPressed()
+    }
+
+    private fun deleteNote() {
+        note?.let {
+            viewModel.delete(it)
+        }
+        onBackPressed()
+    }
+
+    private fun togglePallete() {
+        if (colorPicker.isOpen) {
+            colorPicker.close()
+            hor_scroll_view.animate().
+                    y(-hor_scroll_view.height.toFloat())
+                    .setDuration(DURATION)
+                    .setListener(null)
+                    .start()
+            note_layout.animate()
+                    .yBy(-hor_scroll_view.height.toFloat())
+                    .setDuration(DURATION)
+                    .start()
+        } else {
+            hor_scroll_view.setBackgroundColor(color.getColorInt(this))
+            note_layout.animate()
+                    .yBy(hor_scroll_view.height.toFloat())
+                    .setDuration(DURATION)
+                    .start()
+            hor_scroll_view.animate().
+                    y(hor_scroll_view.height.toFloat())
+                    .setDuration(DURATION)
+                    .setListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            colorPicker.open()
+                        }
+                    })
+                    .start()
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?) = menuInflater.inflate(R.menu.note_menu, menu).let { true }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        android.R.id.home -> onBackPressed().let { true }
+        R.id.pallete -> togglePallete().let { true }
+        R.id.delete -> deleteNote().let { true }
+        else -> super.onOptionsItemSelected(item)
     }
 
 }
