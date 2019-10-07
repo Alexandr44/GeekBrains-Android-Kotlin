@@ -8,13 +8,13 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModelProviders
 import com.alex44.kotlincourse.R
 import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.model.extensions.getColorInt
 import com.alex44.kotlincourse.viewmodel.NoteViewModel
 import com.alex44.kotlincourse.viewmodel.states.NoteViewState
 import kotlinx.android.synthetic.main.activity_note.*
+import org.koin.android.viewmodel.ext.android.viewModel
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.contracts.ExperimentalContracts
@@ -39,9 +39,7 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
     private var color: Note.Color = Note.Color.WHITE
     private var note : Note? = null
     override val layoutResource: Int = R.layout.activity_note
-    override val viewModel : NoteViewModel by lazy {
-        ViewModelProviders.of(this).get(NoteViewModel::class.java)
-    }
+    override val model : NoteViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +48,7 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
 
         val noteId = intent.getStringExtra(EXTRA_NOTE)
         noteId?.let {
-            viewModel.loadNote(it)
+            model.loadNote(it)
         } ?: let {
             getString(R.string.new_note_bar_title)
         }
@@ -125,14 +123,14 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
                 this.color
         )
         note?.let {
-            viewModel.save(it)
+            model.save(it)
         }
         onBackPressed()
     }
 
     private fun deleteNote() {
         note?.let {
-            viewModel.delete(it)
+            model.delete(it)
         }
         onBackPressed()
     }

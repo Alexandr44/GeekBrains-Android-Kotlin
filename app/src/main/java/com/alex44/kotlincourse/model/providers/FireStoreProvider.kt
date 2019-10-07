@@ -10,16 +10,15 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import timber.log.Timber
 
-class FireStoreProvider : RemoteDataProvider {
+class FireStoreProvider(private val firebaseAuth : FirebaseAuth, private val store : FirebaseFirestore) : RemoteDataProvider {
 
     companion object {
         private const val NOTES_COLLECTION = "notes_collection"
         private const val USERS_COLLECTION = "users_collection"
     }
 
-    private val store by lazy { FirebaseFirestore.getInstance() }
     private val fireStoreUser
-        get() = FirebaseAuth.getInstance().currentUser
+        get() = firebaseAuth.currentUser
 
 
     override fun subscribeToAllNotes(): LiveData<NoteResult> = MutableLiveData<NoteResult>().apply {

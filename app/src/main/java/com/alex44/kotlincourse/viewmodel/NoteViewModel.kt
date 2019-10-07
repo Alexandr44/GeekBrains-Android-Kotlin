@@ -6,18 +6,18 @@ import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.model.repositories.NotesRepository
 import com.alex44.kotlincourse.viewmodel.states.NoteViewState
 
-class NoteViewModel : BaseViewModel<Note?, NoteViewState>() {
+class NoteViewModel(private val repo : NotesRepository) : BaseViewModel<Note?, NoteViewState>() {
 
     init {
         viewStateLiveData.value = NoteViewState()
     }
 
     fun save(note : Note) {
-        NotesRepository.saveNote(note)
+        repo.saveNote(note)
     }
 
     fun loadNote(id : String) {
-        NotesRepository.getNoteById(id).observeForever(Observer<NoteResult> {result ->
+        repo.getNoteById(id).observeForever(Observer<NoteResult> {result ->
             if (result == null) return@Observer
 
             when(result) {
@@ -28,7 +28,7 @@ class NoteViewModel : BaseViewModel<Note?, NoteViewState>() {
     }
 
     fun delete(note: Note) {
-        NotesRepository.deleteNote(note)
+        repo.deleteNote(note)
     }
 
 }

@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import com.alex44.kotlincourse.R
 import com.alex44.kotlincourse.model.dtos.Note
@@ -16,6 +15,7 @@ import com.alex44.kotlincourse.viewmodel.MainViewModel
 import com.alex44.kotlincourse.viewmodel.states.MainViewState
 import com.firebase.ui.auth.AuthUI
 import kotlinx.android.synthetic.main.activity_main.*
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class MainActivity : BaseActivity<List<Note>?, MainViewState>(), LogoutDialog.LogoutListener {
 
@@ -25,9 +25,7 @@ class MainActivity : BaseActivity<List<Note>?, MainViewState>(), LogoutDialog.Lo
         }
     }
 
-    override val viewModel: MainViewModel by lazy {
-        ViewModelProviders.of(this).get(MainViewModel::class.java)
-    }
+    override val model: MainViewModel by viewModel()
 
     override val layoutResource : Int = R.layout.activity_main
 
