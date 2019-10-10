@@ -1,5 +1,6 @@
 package com.alex44.kotlincourse.viewmodel
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.alex44.kotlincourse.model.NoteResult
@@ -29,7 +30,8 @@ class MainViewModel(private val repo : NotesRepository) : BaseViewModel<List<Not
         repositoryNotes.observeForever(observer)
     }
 
-    override fun onCleared() {
+    @VisibleForTesting
+    public override fun onCleared() {
         repositoryNotes.removeObserver(observer)
     }
 

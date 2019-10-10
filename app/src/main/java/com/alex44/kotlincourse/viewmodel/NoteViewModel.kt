@@ -20,9 +20,9 @@ class NoteViewModel(private val repo : NotesRepository) : BaseViewModel<Note?, N
         repo.getNoteById(id).observeForever(Observer<NoteResult> {result ->
             if (result == null) return@Observer
 
-            when(result) {
-                is NoteResult.Success<*> -> viewStateLiveData.value = NoteViewState(note = result.data as? Note)
-                is NoteResult.Error -> viewStateLiveData.value = NoteViewState(error = result.error)
+            viewStateLiveData.value = when(result) {
+                is NoteResult.Success<*> -> NoteViewState(note = result.data as? Note)
+                is NoteResult.Error -> NoteViewState(error = result.error)
             }
         })
     }
