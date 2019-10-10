@@ -50,37 +50,26 @@ class NoteViewModelTest {
             result = it?.data
         }
         viewModel.loadNote(testNote.id)
-        notesLiveData.value = NoteResult.Success(result)
+        notesLiveData.value = NoteResult.Success(testNote)
         assertEquals(testNote, result)
     }
 
-//    @Test
-//    fun `should return notes`() {
-//        var result: List<Note>? = null
-//        val testData = listOf(Note("id1"), Note("id2"))
-//        viewModel.getViewState().observeForever{
-//            result = it?.data
-//        }
-//        notesLiveData.value = NoteResult.Success(testData)
-//        assertEquals(testData, result)
-//    }
+    @Test
+    fun `loadNote should return error`() {
+        val error = Throwable("error")
+        var result: Throwable? = null
+        viewModel.getViewState().observeForever {
+            result = it?.error
+        }
+        viewModel.loadNote(testNote.id)
+        notesLiveData.value = NoteResult.Error(error)
+        assertEquals(error, result)
+    }
 
-
-
-/*
     @Test
     fun `should call delete once`() {
-        notesLiveData.value = NoteResult.Success(testNote)
-        var result: MutableLiveData<NoteResult>? = null
-
-        var noteRes: Note? = null
-        viewModel.getViewState().observeForever{
-            noteRes = it?.data
-        }
-
         viewModel.delete(testNote)
-//        verify(mockRepo, times(1)).deleteNote(testNote)
-        assertEquals(testNote, (result as? NoteResult.Success<NoteResult>)?.data)
+        verify(mockRepo, times(1)).deleteNote(testNote)
     }
-*/
+
 }
