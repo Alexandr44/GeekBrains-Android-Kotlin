@@ -10,4 +10,6 @@
     <string name="delete_text">DELETE</string>
     <string name="logout">Logout</string>
     <string name="app_bar_title">My Notes</string>
+    <string name="change_color" translatable="false">Change color</string>
+    <string name="delete_note" translatable="false">Delete note</string>
 </resources>

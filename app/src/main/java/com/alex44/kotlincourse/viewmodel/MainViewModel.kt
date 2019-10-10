@@ -7,9 +7,9 @@ import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.model.repositories.NotesRepository
 import com.alex44.kotlincourse.viewmodel.states.MainViewState
 
-class MainViewModel : BaseViewModel<List<Note>?, MainViewState>() {
+class MainViewModel(private val repo : NotesRepository) : BaseViewModel<List<Note>?, MainViewState>() {
 
-    private val repositoryNotes = NotesRepository.getNotes()
+    private val repositoryNotes = repo.getNotes()
 
     private val observer = Observer<NoteResult> {noteResult ->
         if (noteResult == null) return@Observer

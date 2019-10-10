@@ -4,10 +4,10 @@ import com.alex44.kotlincourse.model.errors.NoAuthException
 import com.alex44.kotlincourse.model.repositories.NotesRepository
 import com.alex44.kotlincourse.viewmodel.states.SplashViewState
 
-class SplashViewModel : BaseViewModel<Boolean?, SplashViewState>() {
+class SplashViewModel(private val repo : NotesRepository) : BaseViewModel<Boolean?, SplashViewState>() {
 
     fun requestUser() {
-        NotesRepository.getCurrentUser().observeForever {
+        repo.getCurrentUser().observeForever {
             viewStateLiveData.value = if (it != null) {
                 SplashViewState(authenticated = true)
             }
