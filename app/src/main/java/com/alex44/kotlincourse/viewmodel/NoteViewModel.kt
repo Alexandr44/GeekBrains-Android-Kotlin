@@ -6,7 +6,7 @@ import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.model.repositories.NotesRepository
 import com.alex44.kotlincourse.viewmodel.states.NoteViewState
 
-class NoteViewModel(private val repo : NotesRepository) : BaseViewModel<Note?, NoteViewState>() {
+open class NoteViewModel(private val repo : NotesRepository) : BaseViewModel<Note?, NoteViewState>() {
 
     init {
         viewStateLiveData.value = NoteViewState()
