@@ -4,7 +4,7 @@ import com.alex44.kotlincourse.model.errors.NoAuthException
 import com.alex44.kotlincourse.model.repositories.NotesRepository
 import com.alex44.kotlincourse.viewmodel.states.SplashViewState
 
-class SplashViewModel(private val repo : NotesRepository) : BaseViewModel<Boolean?, SplashViewState>() {
+open class SplashViewModel(private val repo : NotesRepository) : BaseViewModel<Boolean?, SplashViewState>() {
 
     fun requestUser() {
         repo.getCurrentUser().observeForever {

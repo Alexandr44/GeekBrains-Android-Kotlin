@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.alex44.kotlincourse.R
 import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.model.extensions.getColorInt
+import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.note_item.view.*
 
 class NotesRvAdapter(val onItemClick: ((Note) -> Unit)? = null) : RecyclerView.Adapter<NotesRvAdapter.ViewHolder>() {
@@ -27,7 +28,7 @@ class NotesRvAdapter(val onItemClick: ((Note) -> Unit)? = null) : RecyclerView.A
         holder.bind(notes[position])
     }
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
         fun bind(note: Note) = with(itemView) {
             item_title.text = note.title

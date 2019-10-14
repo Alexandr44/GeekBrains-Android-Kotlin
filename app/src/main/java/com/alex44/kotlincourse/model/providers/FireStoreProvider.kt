@@ -38,7 +38,7 @@ class FireStoreProvider(private val firebaseAuth : FirebaseAuth, private val sto
                     }
         }
         catch (e : Throwable) {
-            NoteResult.Error(e)
+            value = NoteResult.Error(e)
         }
     }
 
@@ -53,7 +53,7 @@ class FireStoreProvider(private val firebaseAuth : FirebaseAuth, private val sto
                     }
         }
         catch (e : Throwable) {
-            NoteResult.Error(e)
+            value = NoteResult.Error(e)
         }
     }
 
@@ -70,7 +70,7 @@ class FireStoreProvider(private val firebaseAuth : FirebaseAuth, private val sto
                     }
         }
         catch (e : Throwable) {
-            NoteResult.Error(e)
+            value = NoteResult.Error(e)
         }
     }
 
@@ -87,7 +87,7 @@ class FireStoreProvider(private val firebaseAuth : FirebaseAuth, private val sto
                     }
         }
         catch (e : Throwable) {
-            NoteResult.Error(e)
+            value = NoteResult.Error(e)
         }
     }
 
