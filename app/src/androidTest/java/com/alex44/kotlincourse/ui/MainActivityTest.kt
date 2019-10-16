@@ -12,6 +12,8 @@ import com.alex44.kotlincourse.view.ui.activities.MainActivity
 import com.alex44.kotlincourse.view.ui.adapters.NotesRvAdapter
 import com.alex44.kotlincourse.viewmodel.MainViewModel
 import com.alex44.kotlincourse.viewmodel.states.MainViewState
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -20,14 +22,12 @@ import org.koin.android.viewmodel.ext.koin.viewModel
 import org.koin.dsl.module.module
 import org.koin.standalone.StandAloneContext.loadKoinModules
 import org.koin.standalone.StandAloneContext.stopKoin
-import org.mockito.Mockito
-import org.mockito.Mockito.doReturn
 
 class MainActivityTest {
     @get:Rule
     val activityTestRule = IntentsTestRule(MainActivity::class.java, true, false)
 
-    private val model: MainViewModel = Mockito.mock(MainViewModel::class.java)
+    private val model: MainViewModel = mockk(relaxed = true)
     private val viewStateLiveData = MutableLiveData<MainViewState>()
     private val testNotes = listOf(
             Note("Id1", "Title1", "Text1"),
@@ -45,7 +45,7 @@ class MainActivityTest {
                 )
         )
 
-        doReturn(viewStateLiveData).`when`(model).getViewState()
+        every { model.getViewState() } returns viewStateLiveData
         activityTestRule.launchActivity(null)
         viewStateLiveData.postValue(MainViewState(notes = testNotes))
     }
