@@ -4,10 +4,9 @@ import android.os.Bundle
 import android.os.Handler
 import com.alex44.kotlincourse.R
 import com.alex44.kotlincourse.viewmodel.SplashViewModel
-import com.alex44.kotlincourse.viewmodel.states.SplashViewState
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class SplashActivity : BaseActivity<Boolean?, SplashViewState>() {
+class SplashActivity : BaseActivity<Boolean?>() {
 
     companion object {
         private const val START_DELAY = 1000L

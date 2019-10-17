@@ -1,14 +1,44 @@
 package com.alex44.kotlincourse.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.alex44.kotlincourse.viewmodel.states.BaseViewState
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlin.coroutines.CoroutineContext
 
-open class BaseViewModel<T, G : BaseViewState<T>> : ViewModel() {
+open class BaseViewModel<G> : ViewModel(), CoroutineScope {
 
-    open val viewStateLiveData = MutableLiveData<G>()
+    override val coroutineContext: CoroutineContext by lazy {
+        Dispatchers.Default + Job()
+    }
 
-    open fun getViewState() : LiveData<G> = viewStateLiveData
+    @ExperimentalCoroutinesApi
+    private val viewStateChannel = BroadcastChannel<G  >(Channel.CONFLATED)
+    private val errorChannel = Channel<Throwable>()
 
+    @ExperimentalCoroutinesApi
+    fun getViewState() : ReceiveChannel<G> = viewStateChannel.openSubscription()
+    fun getErrorChannel() : ReceiveChannel<Throwable> = errorChannel
+
+    protected fun setError(error: Throwable) {
+        launch {
+            errorChannel.send(error)
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    protected fun setData(data: G) {
+        launch {
+            viewStateChannel.send(data)
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    override fun onCleared() {
+        viewStateChannel.close()
+        errorChannel.close()
+        coroutineContext.cancel()
+        super.onCleared()
+    }
 }

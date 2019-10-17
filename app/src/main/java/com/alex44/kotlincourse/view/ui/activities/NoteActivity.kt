@@ -12,14 +12,12 @@ import com.alex44.kotlincourse.R
 import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.model.extensions.getColorInt
 import com.alex44.kotlincourse.viewmodel.NoteViewModel
-import com.alex44.kotlincourse.viewmodel.states.NoteViewState
 import kotlinx.android.synthetic.main.activity_note.*
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.contracts.ExperimentalContracts
 
-class NoteActivity : BaseActivity<Note?, NoteViewState>() {
+class NoteActivity : BaseActivity<Note?>() {
 
     companion object {
         private val EXTRA_NOTE = NoteActivity::class.java.name + "extra.NOTE"
@@ -49,9 +47,14 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
         val noteId = intent.getStringExtra(EXTRA_NOTE)
         noteId?.let {
             model.loadNote(it)
-        } ?: let {
-            getString(R.string.new_note_bar_title)
-        }
+        } ?: init()
+    }
+    
+    private fun init() {
+        initBar()
+        initNote()
+        initButtons()
+        initColorPicker()
     }
 
     private fun initBar() {
@@ -99,14 +102,10 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
         }
     }
 
-    @ExperimentalContracts
     override fun renderData(data: Note?) {
         this.note = data
         this.color = note?.color ?: Note.Color.WHITE
-        initBar()
-        initNote()
-        initButtons()
-        initColorPicker()
+        init()
     }
 
     private fun saveNote() {

@@ -12,13 +12,12 @@ import com.alex44.kotlincourse.R
 import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.view.ui.adapters.NotesRvAdapter
 import com.alex44.kotlincourse.viewmodel.MainViewModel
-import com.alex44.kotlincourse.viewmodel.states.MainViewState
 import com.firebase.ui.auth.AuthUI
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.alert
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class MainActivity : BaseActivity<List<Note>?, MainViewState>() {
+class MainActivity : BaseActivity<List<Note>?>() {
 
     companion object {
         fun start(context : Context) = Intent(context, MainActivity::class.java).run {
