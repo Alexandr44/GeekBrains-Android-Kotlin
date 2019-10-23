@@ -11,6 +11,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
 import com.nhaarman.mockitokotlin2.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
@@ -59,77 +63,118 @@ class FirestoreProviderTest {
 
     @Test
     fun `should throw NoAuthException if no auth`() {
-        var result: Any? = null
-        whenever(mockFireAuth.currentUser).thenReturn(null)
-        provider.subscribeToAllNotes().observeForever {
-            result = (it as? NoteResult.Error)?.error
+        runBlocking {
+            whenever(mockFireAuth.currentUser).thenReturn(null)
+            val result = (provider.subscribeToAllNotes().receive() as? NoteResult.Error)?.error
+            assertTrue(result is NoAuthException)
         }
-        assertTrue(result is NoAuthException)
     }
 
     @Test
     fun `subscribeToAllNotes returns notes`() {
-        var result: Any? = null
-        val mockSnapshot = mock<QuerySnapshot>()
-        val captor = argumentCaptor<EventListener<QuerySnapshot>>()
+        runBlocking {
+            val mockSnapshot = mock<QuerySnapshot>()
+            val captor = argumentCaptor<EventListener<QuerySnapshot>>()
 
-        whenever(mockSnapshot.documents).thenReturn(listOf(mockDocument1, mockDocument2, mockDocument3))
-        whenever(mockResultCollection.addSnapshotListener(captor.capture())).thenReturn(mock())
-        provider.subscribeToAllNotes().observeForever {
-            result = (it as? NoteResult.Success<List<Note>>)?.data
+            whenever(mockSnapshot.documents).thenReturn(listOf(mockDocument1, mockDocument2, mockDocument3))
+            whenever(mockResultCollection.addSnapshotListener(captor.capture())).thenReturn(mock())
+
+            val deferred = async {
+                (provider.subscribeToAllNotes().receive() as? NoteResult.Success<List<Note>>)?.data
+            }
+            delay(100)
+
+            captor.firstValue.onEvent(mockSnapshot, null)
+            val result = deferred.await()
+
+            assertEquals(testNotes, result)
         }
-        captor.firstValue.onEvent(mockSnapshot, null)
-        assertEquals(testNotes, result)
     }
 
     @Test
     fun `subscribeToAllNotes returns error`() {
-        var result: Throwable? = null
-        val testError = mock<FirebaseFirestoreException>()
-        val captor = argumentCaptor<EventListener<QuerySnapshot>>()
+        runBlocking {
+            val testError = mock<FirebaseFirestoreException>()
+            val captor = argumentCaptor<EventListener<QuerySnapshot>>()
 
-        whenever(mockResultCollection.addSnapshotListener(captor.capture())).thenReturn(mock())
-        provider.subscribeToAllNotes().observeForever {
-            result = (it as? NoteResult.Error)?.error
+            whenever(mockResultCollection.addSnapshotListener(captor.capture())).thenReturn(mock())
+
+            var deferred = async {
+                (provider.subscribeToAllNotes().receive() as? NoteResult.Error)?.error
+            }
+            delay(100)
+
+            captor.firstValue.onEvent(null, testError)
+            val result = deferred.await()
+
+            assertEquals(testError, result)
         }
-        captor.firstValue.onEvent(null, testError)
-        assertEquals(testError, result)
     }
 
     @Test
     fun `saveNote calls document set`() {
-        val mockDocumentReference = mock<DocumentReference>()
-        whenever(mockResultCollection.document(testNotes[0].id)).thenReturn(mockDocumentReference)
-        provider.saveNote(testNotes[0])
-        verify(mockDocumentReference, times(1)).set(testNotes[0])
+        runBlocking {
+            val mockDocumentReference = mock<DocumentReference>()
+            whenever(mockResultCollection.document(testNotes[0].id)).thenReturn(mockDocumentReference)
+
+            val captor = argumentCaptor<OnSuccessListener<in Void>>()
+            val mockTask = mock<Task<Void>>()
+            whenever(mockTask.addOnSuccessListener(captor.capture())).thenReturn(mockTask)
+            whenever(mockDocumentReference.set(testNotes[0])).thenReturn(mockTask)
+
+            launch {
+                provider.saveNote(testNotes[0])
+            }
+            delay(100)
+
+            captor.firstValue.onSuccess(null)
+            verify(mockDocumentReference, times(1)).set(testNotes[0])
+        }
     }
 
     @Test
     fun `saveNote returns note`() {
-        val mockDocumentReference = mock<DocumentReference>()
-        var result: Note? = null
-        val captor = argumentCaptor<OnSuccessListener<in Void>>()
+        runBlocking {
+            val mockDocumentReference = mock<DocumentReference>()
+            val captor = argumentCaptor<OnSuccessListener<in Void>>()
 
-        val mockTask = mock<Task<Void>>()
-        whenever(mockTask.addOnSuccessListener(captor.capture())).thenReturn(mockTask)
-        whenever(mockDocumentReference.set(testNotes[0])).thenReturn(mockTask)
-        whenever(mockResultCollection.document(testNotes[0].id)).thenReturn(mockDocumentReference)
+            val mockTask = mock<Task<Void>>()
+            whenever(mockTask.addOnSuccessListener(captor.capture())).thenReturn(mockTask)
+            whenever(mockDocumentReference.set(testNotes[0])).thenReturn(mockTask)
+            whenever(mockResultCollection.document(testNotes[0].id)).thenReturn(mockDocumentReference)
 
-        provider.saveNote(testNotes[0]).observeForever {
-            result = (it as? NoteResult.Success<Note>)?.data
+            val deferred = async {
+                provider.saveNote(testNotes[0]) as? Note
+            }
+            delay(100)
+
+            captor.firstValue.onSuccess(null)
+            val result = deferred.await()
+
+            assertNotNull(result)
+            assertEquals(testNotes[0], result)
         }
-        captor.firstValue.onSuccess(null)
-
-        assertNotNull(result)
-        assertEquals(testNotes[0], result)
     }
 
     @Test
     fun `deleteNote calls document delete`() {
-        val mockDocumentReference = mock<DocumentReference>()
-        whenever(mockResultCollection.document(testNotes[0].id)).thenReturn(mockDocumentReference)
-        provider.deleteNote(testNotes[0])
-        verify(mockDocumentReference, times(1)).delete()
+        runBlocking {
+            val mockDocumentReference = mock<DocumentReference>()
+            whenever(mockResultCollection.document(testNotes[0].id)).thenReturn(mockDocumentReference)
+
+            val captor = argumentCaptor<OnSuccessListener<in Void>>()
+            val mockTask = mock<Task<Void>>()
+            whenever(mockTask.addOnSuccessListener(captor.capture())).thenReturn(mockTask)
+            whenever(mockDocumentReference.delete()).thenReturn(mockTask)
+
+            launch {
+                provider.deleteNote(testNotes[0])
+            }
+            delay(100)
+
+            captor.firstValue.onSuccess(null)
+            verify(mockDocumentReference, times(1)).delete()
+        }
     }
 
 }
