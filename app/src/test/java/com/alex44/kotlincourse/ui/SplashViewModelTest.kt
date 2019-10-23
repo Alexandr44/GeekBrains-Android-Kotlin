@@ -1,19 +1,19 @@
 package com.alex44.kotlincourse.ui
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.alex44.kotlincourse.model.NoteResult
-import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.model.dtos.User
 import com.alex44.kotlincourse.model.errors.NoAuthException
 import com.alex44.kotlincourse.model.repositories.NotesRepository
-import com.alex44.kotlincourse.viewmodel.MainViewModel
-import com.alex44.kotlincourse.viewmodel.NoteViewModel
 import com.alex44.kotlincourse.viewmodel.SplashViewModel
-import com.alex44.kotlincourse.viewmodel.states.NoteViewState
-import com.nhaarman.mockitokotlin2.*
-import junit.framework.Assert.*
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.reset
+import com.nhaarman.mockitokotlin2.whenever
+import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertTrue
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -24,40 +24,50 @@ class SplashViewModelTest {
     val taskExecutorRule = InstantTaskExecutorRule()
 
     private val mockRepo = mock<NotesRepository>()
-    private val splashLiveData = MutableLiveData<User>()
 
     private lateinit var viewModel: SplashViewModel
+
+    private val testUser = User("name1")
+
+    private val channel = Channel<NoteResult>(Channel.CONFLATED)
 
     @Before
     fun setup() {
         reset(mockRepo)
-        whenever(mockRepo.getCurrentUser()).thenReturn(splashLiveData)
+        whenever(mockRepo.getNotes()).thenReturn(channel)
         viewModel = SplashViewModel(mockRepo)
     }
 
     @Test
-    fun `requestUser should return User`() {
-        var result: Boolean? = false
-        val user = User("Name", "Email", "Phone", "Url")
-        viewModel.getViewState().observeForever {
-            result = it?.data
+    fun `requestUser should return true`() {
+        runBlocking {
+            whenever(mockRepo.getCurrentUser()).thenReturn(testUser)
+
+            val deferred = async {
+                viewModel.getViewState().receive()
+            }
+
+            viewModel.requestUser()
+
+            val result = deferred.await()
+            assertTrue(result ?: false)
         }
-        viewModel.requestUser()
-        splashLiveData.value = user
-        assertTrue(result?:false)
     }
 
     @Test
     fun `requestUser should return error`() {
-        var result: Throwable? = null
-        val error = NoAuthException()
-        viewModel.getViewState().observeForever {
-            result = it?.error
+        runBlocking {
+            whenever(mockRepo.getCurrentUser()).thenReturn(null)
+
+            val deferred = async {
+                viewModel.getErrorChannel().receive()
+            }
+
+            viewModel.requestUser()
+
+            val result = deferred.await()
+            assertEquals(NoAuthException::class.java, result::class.java)
         }
-        viewModel.requestUser()
-        splashLiveData.value = null
-        assertTrue(result != null)
-        assertEquals(error::class.java, result!!::class.java)
     }
 
 }

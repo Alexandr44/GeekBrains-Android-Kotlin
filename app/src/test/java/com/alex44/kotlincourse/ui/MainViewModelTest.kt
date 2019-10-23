@@ -1,14 +1,15 @@
 package com.alex44.kotlincourse.ui
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.MutableLiveData
 import com.alex44.kotlincourse.model.NoteResult
 import com.alex44.kotlincourse.model.dtos.Note
 import com.alex44.kotlincourse.model.repositories.NotesRepository
 import com.alex44.kotlincourse.viewmodel.MainViewModel
 import com.nhaarman.mockitokotlin2.*
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertFalse
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -19,14 +20,17 @@ class MainViewModelTest {
     val taskExecutorRule = InstantTaskExecutorRule()
 
     private val mockRepo = mock<NotesRepository>()
-    private val notesLiveData = MutableLiveData<NoteResult>()
 
     private lateinit var viewModel: MainViewModel
 
+    private val testNote = Note("id1")
+    private val testError = Throwable("error")
+
+    private val channel = Channel<NoteResult>(Channel.CONFLATED)
     @Before
     fun setup() {
         reset(mockRepo)
-        whenever(mockRepo.getNotes()).thenReturn(notesLiveData)
+        whenever(mockRepo.getNotes()).thenReturn(channel)
         viewModel = MainViewModel(mockRepo)
     }
 
@@ -37,30 +41,28 @@ class MainViewModelTest {
 
     @Test
     fun `should return notes`() {
-        var result: List<Note>? = null
-        val testData = listOf(Note("id1"), Note("id2"))
-        viewModel.getViewState().observeForever{
-            result = it?.data
+        runBlocking {
+            val deferred = async {
+                viewModel.getViewState().receive()
+            }
+
+            channel.send(NoteResult.Success(listOf(testNote)))
+            val result = deferred.await()
+            assertEquals(listOf(testNote), result)
         }
-        notesLiveData.value = NoteResult.Success(testData)
-        assertEquals(testData, result)
     }
 
     @Test
     fun `should return error`() {
-        var result: Throwable? = null
-        val testData = Throwable("error")
-        viewModel.getViewState().observeForever{
-            result = it?.error
-        }
-        notesLiveData.value = NoteResult.Error(testData)
-        assertEquals(testData, result)
-    }
+        runBlocking {
+            val deferred = async {
+                viewModel.getErrorChannel().receive()
+            }
 
-    @Test
-    fun `should remove observer`() {
-        viewModel.onCleared()
-        assertFalse(notesLiveData.hasObservers())
+            channel.send(NoteResult.Error(testError))
+            val result = deferred.await()
+            assertEquals(testError, result)
+        }
     }
 
 }
