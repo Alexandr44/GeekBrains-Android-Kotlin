@@ -34,7 +34,7 @@ class NoteActivityTest {
     private val viewStateLiveData = MutableLiveData<NoteViewState>()
 
     private val testNote = Note("Id", "Title", "Text")
-
+/*
     @Before
     fun setup() {
         loadKoinModules(
@@ -67,5 +67,5 @@ class NoteActivityTest {
         onView(withId(R.id.pallete)).perform(click())
         onView(withId(R.id.colorPicker)).check(matches(isCompletelyDisplayed()))
     }
-
+*/
 }

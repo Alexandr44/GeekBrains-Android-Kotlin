@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 
 open class MainViewModel(private val repo : NotesRepository) : BaseViewModel<List<Note>?>() {
 
-    private val notesChannel = repo.getNotes()
+    public val notesChannel = repo.getNotes()
 
     init {
         launch {

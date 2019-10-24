@@ -28,7 +28,7 @@ class SplashActivityTest {
 
     private val model: SplashViewModel = mockk(relaxed = true)
     private val viewStateLiveData = MutableLiveData<SplashViewState>()
-
+/*
     @Before
     fun setup() {
         loadKoinModules(
@@ -56,5 +56,5 @@ class SplashActivityTest {
     fun test() {
 
     }
-
+*/
 }
